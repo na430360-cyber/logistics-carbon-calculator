@@ -72,9 +72,10 @@ function loadGoogleMaps(){
     s.onerror=()=>reject(new Error("โหลด Google Maps ไม่สำเร็จ"));
     document.head.appendChild(s);
   }).then(async()=>{
-    const [{Map},{Route}]=await Promise.all([google.maps.importLibrary("maps"),google.maps.importLibrary("routes")]);
+    const [{Map},{Route},{AdvancedMarkerElement}]=await Promise.all([google.maps.importLibrary("maps"),google.maps.importLibrary("routes"),google.maps.importLibrary("marker")]);
     googleRouteClass=Route;
-    routeMap=new Map(document.getElementById("routeMap"),{center:{lat:13.7563,lng:100.5018},zoom:6,mapTypeControl:true,streetViewControl:false,fullscreenControl:true});
+    window.googleAdvancedMarker=AdvancedMarkerElement;
+    routeMap=new Map(document.getElementById("routeMap"),{center:{lat:15.0,lng:101.0},zoom:6,mapTypeControl:false,streetViewControl:false,fullscreenControl:false,gestureHandling:"greedy",clickableIcons:false});
     googleMapsLoaded=true;
     setGoogleStatus("Google Maps พร้อมใช้งานแล้ว ✓","success");
     setPickMode("origin");
@@ -98,7 +99,7 @@ async function initRouteMap(){
 function setPickMode(mode){pickMode=mode;document.getElementById("pickOrigin").classList.toggle("active",mode==="origin");document.getElementById("pickDestination").classList.toggle("active",mode==="destination");}
 function handleMapClick(latlng){
   if(!googleMapsLoaded)return;
-  const marker=new google.maps.Marker({position:latlng,map:routeMap});
+  const marker=new window.googleAdvancedMarker({position:latlng,map:routeMap,title:pickMode==="origin"?"ต้นทาง":"ปลายทาง"});
   if(pickMode==="origin"){if(originMarker)originMarker.setMap(null);originMarker=marker;originPoint=latlng;setPickMode("destination");}
   else{if(destinationMarker)destinationMarker.setMap(null);destinationMarker=marker;destinationPoint=latlng;}
   updateRouteInfo();
@@ -114,14 +115,14 @@ async function calculateGoogleRoute(){
  const info=document.getElementById("routeInfo");info.innerHTML='<div class="notice">กำลังคำนวณเส้นทางด้วย Google Routes API…</div>';
  try{
   routePolylines.forEach(p=>p.setMap(null));routePolylines=[];
-  const request={origin:originPoint,destination:destinationPoint,travelMode:"DRIVING",routingPreference:"TRAFFIC_AWARE",fields:["path","distanceMeters","durationMillis"]};
+  const request={origin:originPoint,destination:destinationPoint,travelMode:"DRIVING",routingPreference:"TRAFFIC_UNAWARE",fields:["path","distanceMeters","duration"]};
   const result=await googleRouteClass.computeRoutes(request);
   if(!result.routes||!result.routes.length)throw new Error("ไม่พบเส้นทาง");
   const route=result.routes[0];
-  routePolylines=route.createPolylines({polylineOptions:{strokeOpacity:0.9,strokeWeight:5}});
+  routePolylines=route.createPolylines({polylineOptions:{strokeOpacity:0.9,strokeWeight:4,clickable:false}});
   routePolylines.forEach(p=>p.setMap(routeMap));
-  if(route.viewport)routeMap.fitBounds(route.viewport);
-  const km=(route.distanceMeters||0)/1000, mins=(route.durationMillis||0)/60000;
+  if(route.viewport)if(route.viewport)routeMap.fitBounds(route.viewport);
+  const km=(route.distanceMeters||0)/1000, mins=(route.duration||0)/60;
   document.getElementById("distance").value=km.toFixed(2);
   syncAll();
   info.innerHTML='<div class="notice success"><b>Google Routes คำนวณเส้นทางแล้ว ✓</b><br>ระยะทางถนนประมาณ <b>'+km.toFixed(2)+' km</b> · เวลาเดินทางประมาณ <b>'+Math.round(mins)+' นาที</b><br><span class="small">ระบบนำระยะทางนี้ไปอัปเดตข้อ 1 และผลคำนวณส่วนอื่นโดยอัตโนมัติ</span></div>';
