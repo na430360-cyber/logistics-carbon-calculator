@@ -36,12 +36,12 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:12px;bord
 </div><div class="actions"><button class="btn primary" onclick="calculate()">คำนวณผลลัพธ์</button><button class="btn secondary" onclick="loadExample()">โหลดตัวอย่างทดสอบ</button></div>
 <div id="fuelSource" class="sourcebox live"></div></div>
 <div class="card"><h2>2. ผลการคำนวณ</h2><p class="muted small">ผลลัพธ์ใช้เพื่อสนับสนุนการตัดสินใจ ไม่ได้หมายความว่าแผนที่มี CO₂e ต่ำที่สุดจะเหมาะสมที่สุดเสมอ ต้องพิจารณาความจุรถ เวลาให้บริการ ความเสี่ยง และต้นทุนร่วมด้วย</p><div id="capacityMsg" class="notice">กด “คำนวณผลลัพธ์” เพื่อเริ่มต้น</div><div class="kpis" style="grid-template-columns:1fr 1fr"><div class="kpi"><div class="label">CO₂e ต่อเที่ยว</div><div id="co2" class="value">—</div><small>kgCO₂e/trip</small></div><div class="kpi"><div class="label">ความเข้มการปล่อย</div><div id="intensity" class="value">—</div><small>kgCO₂e/ton-km</small></div><div class="kpi"><div class="label">เชื้อเพลิง</div><div id="fuel" class="value">—</div><small>L/trip</small></div><div class="kpi"><div class="label">ต้นทุนรวม</div><div id="cost" class="value">—</div><small>บาท/trip</small></div></div><div class="formula small"><b>สูตรหลักของระบบ</b><br>Fuel (L) = Distance (km) ÷ Efficiency (km/L)<br>CO₂e (kg) = Fuel (L) × Emission Factor (kgCO₂e/L)<br>Emission Intensity = CO₂e ÷ (Weight (ton) × Distance (km))<br>Total Cost = Fuel Cost + Fixed Cost<br><span class="muted">หมายเหตุ: ทุกแผนที่นำมาเปรียบเทียบต้องใช้ขอบเขต หน่วย และสมมติฐานเดียวกัน เพื่อหลีกเลี่ยงการเปรียบเทียบที่ไม่เป็นธรรม</span></div></div></div>
-<div class="card" style="margin-top:20px"><h2>📍 GPS / จุดรับ–ส่งสินค้า</h2><p class="muted"><b>คำชี้แจง:</b> ปักหมุดต้นทางและปลายทางบนแผนที่ ระบบจะหาเส้นทางถนนระหว่างสองจุดและนำระยะทางที่ได้ไปเชื่อมกับช่อง “ระยะทาง (km)” ในข้อ 1 โดยอัตโนมัติ จึงไม่ต้องพิมพ์ระยะทางเอง</p><div class="notice">เลือก <b>ต้นทาง</b> แล้วคลิกบนแผนที่ จากนั้นเลือก <b>ปลายทาง</b> แล้วคลิกอีกจุด ระบบจะคำนวณเส้นทางเมื่อมีครบทั้ง 2 จุด</div><div class="maptools"><button id="pickOrigin" class="mapbtn active" type="button">📦 เลือกต้นทาง</button><button id="pickDestination" class="mapbtn" type="button">📍 เลือกปลายทาง</button><button id="clearRoute" class="mapbtn" type="button">ล้างจุด</button></div><div id="routeMap" class="map leaf letbox"></div><div id="routeInfo" class="routeinfo"><div class="sourcebox"><b>สถานะ:</b> รอการปักหมุดต้นทางและปลายทาง</div></div><p class="small muted">แผนที่และเส้นทางใช้ข้อมูล OpenStreetMap และบริการ OSRM สำหรับการคำนวณเส้นทางถนน ควรใช้เป็นค่าประมาณสำหรับการวางแผน และตรวจสอบกับ GPS/TMS จริงเมื่อมีข้อมูลจริง</p></div><div class="card" style="margin-top:20px"><h2>3. ตัวอย่างทดสอบ: รวม 2 เที่ยว</h2><p class="muted"><b>เชื่อมกับข้อมูลข้อ 1 อัตโนมัติ:</b> ไม่ต้องกรอกข้อมูลซ้ำ ระบบจะนำระยะทาง น้ำหนัก ความจุรถ ประสิทธิภาพเชื้อเพลิง Emission Factor ราคาน้ำมัน และต้นทุนคงที่จากข้อมูลการขนส่งด้านบนมาใช้เป็นฐานในการทดสอบ</p><div class="notice">แนวคิดการทดสอบ: สมมติว่าเที่ยวปัจจุบันมีข้อมูลตามข้อ 1 และต้องการดูว่า หากรวมงานอีกหนึ่งเที่ยวที่มีน้ำหนักเท่ากับเที่ยวปัจจุบัน จะยังอยู่ภายในความจุรถหรือไม่ พร้อมเปรียบเทียบ CO₂e และต้นทุน</div><div class="sourcebox"><h3>ข้อมูลที่ระบบจะนำมาใช้</h3><div class="sourcegrid"><div><b>น้ำหนักเที่ยวปัจจุบัน</b><br><span id="combineWeightDisplay">—</span> ton</div><div><b>ความจุรถ</b><br><span id="combineCapacityDisplay">—</span> ton</div><div><b>ระยะทาง</b><br><span id="combineDistanceDisplay">—</span> km</div><div><b>Efficiency</b><br><span id="combineEfficiencyDisplay">—</span> km/L</div></div></div><div class="actions"><button class="btn primary" onclick="testCombine()">ตรวจการรวมเที่ยวจากข้อมูลข้อ 1</button></div><div id="combineResult" style="margin-top:14px"></div></div>
+<div class="card" style="margin-top:20px"><h2>📍 Google Maps / จุดรับ–ส่งสินค้า</h2><p class="muted"><b>คำชี้แจง:</b> ระบบใช้ Google Maps และ Google Routes API เพื่อหาเส้นทางถนนจากต้นทางไปปลายทาง แล้วนำระยะทางไปเชื่อมกับช่อง “ระยะทาง (km)” ในข้อ 1 โดยอัตโนมัติ</p><div class="sourcebox api"><h3>🔑 ตั้งค่า Google Maps API Key</h3><p class="small">ครั้งแรกให้วาง API Key ของ Google Maps ที่สร้างจาก Google Cloud แล้วกด “เปิดใช้ Google Maps” ระบบจะเก็บ Key ไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ได้เขียน Key ลงใน GitHub</p><div class="formgrid"><div class="field full"><label>Google Maps API Key</label><input id="googleApiKey" type="password" placeholder="วาง API Key ที่นี่"></div></div><div class="actions"><button id="loadGoogleMap" class="btn primary" type="button">เปิดใช้ Google Maps</button><button id="removeGoogleKey" class="btn secondary" type="button">ลบ Key จากเครื่องนี้</button></div><div id="googleStatus" class="small muted" style="margin-top:8px">ยังไม่ได้เชื่อมต่อ Google Maps</div></div><div class="notice">หลังเปิดใช้งานแล้ว ให้เลือก <b>ต้นทาง</b> แล้วคลิกบนแผนที่ จากนั้นเลือก <b>ปลายทาง</b> ระบบจะเรียก Google Routes API และคำนวณระยะทางถนนให้โดยอัตโนมัติ</div><div class="maptools"><button id="pickOrigin" class="mapbtn active" type="button">📦 เลือกต้นทาง</button><button id="pickDestination" class="mapbtn" type="button">📍 เลือกปลายทาง</button><button id="clearRoute" class="mapbtn" type="button">ล้างจุด</button></div><div id="routeMap" class="map leafletbox"></div><div id="routeInfo" class="routeinfo"><div class="sourcebox"><b>สถานะ:</b> กรุณาเปิดใช้ Google Maps ก่อน</div></div><p class="small muted">หมายเหตุ: Google Maps Platform ใช้ระบบ Billing และมี Free Usage Cap ตาม SKU; Routes: Compute Routes Essentials มีโควตาฟรี 10,000 requests/เดือนตามราคาปัจจุบันของ Google แต่หากเกินโควตาหรือใช้บริการที่คิดค่าบริการอาจมีค่าใช้จ่าย จึงควรตั้ง Budget/Quota ใน Google Cloud</p></div><div class="card" style="margin-top:20px"><h2>3. ตัวอย่างทดสอบ: รวม 2 เที่ยว</h2><p class="muted"><b>เชื่อมกับข้อมูลข้อ 1 อัตโนมัติ:</b> ไม่ต้องกรอกข้อมูลซ้ำ ระบบจะนำระยะทาง น้ำหนัก ความจุรถ ประสิทธิภาพเชื้อเพลิง Emission Factor ราคาน้ำมัน และต้นทุนคงที่จากข้อมูลการขนส่งด้านบนมาใช้เป็นฐานในการทดสอบ</p><div class="notice">แนวคิดการทดสอบ: สมมติว่าเที่ยวปัจจุบันมีข้อมูลตามข้อ 1 และต้องการดูว่า หากรวมงานอีกหนึ่งเที่ยวที่มีน้ำหนักเท่ากับเที่ยวปัจจุบัน จะยังอยู่ภายในความจุรถหรือไม่ พร้อมเปรียบเทียบ CO₂e และต้นทุน</div><div class="sourcebox"><h3>ข้อมูลที่ระบบจะนำมาใช้</h3><div class="sourcegrid"><div><b>น้ำหนักเที่ยวปัจจุบัน</b><br><span id="combineWeightDisplay">—</span> ton</div><div><b>ความจุรถ</b><br><span id="combineCapacityDisplay">—</span> ton</div><div><b>ระยะทาง</b><br><span id="combineDistanceDisplay">—</span> km</div><div><b>Efficiency</b><br><span id="combineEfficiencyDisplay">—</span> km/L</div></div></div><div class="actions"><button class="btn primary" onclick="testCombine()">ตรวจการรวมเที่ยวจากข้อมูลข้อ 1</button></div><div id="combineResult" style="margin-top:14px"></div></div>
 </section>
 <section id="compare" class="hidden"><div class="card"><h2>เปรียบเทียบแผนขนส่ง</h2><p class="muted"><b>คำชี้แจง:</b> ตารางนี้ใช้ข้อมูลจากหน้าคำนวณปัจจุบันเพื่อเปรียบเทียบ Baseline กับทางเลือก เช่น รวมเที่ยว หรือเพิ่มประสิทธิภาพการบรรทุก โดยต้องเปรียบเทียบภายใต้ขอบเขตและปริมาณงานเดียวกัน</p><div class="kpis"><div class="kpi"><div class="label">คาร์บอนต่ำสุด</div><div id="bestCarbon" class="value">—</div></div><div class="kpi"><div class="label">ต้นทุนต่ำสุด</div><div id="bestCost" class="value">—</div></div><div class="kpi"><div class="label">ลด CO₂e จากแผนเดิม</div><div id="saving" class="value">—</div></div><div class="kpi"><div class="label">ลดต้นทุนจากแผนเดิม</div><div id="costSaving" class="value">—</div></div></div><table><thead><tr><th>ทางเลือก</th><th>เที่ยว</th><th>CO₂e (kg)</th><th>kgCO₂e/ton-km</th><th>ต้นทุน (บาท)</th><th>สถานะ</th></tr></thead><tbody id="compareBody"></tbody></table></div></section>
 <section id="about" class="hidden"><div class="grid"><div class="card"><h2>ขอบเขตและหลักการ</h2><p class="muted">เว็บไซต์นี้เป็น <b>Decision Support Prototype</b> สำหรับประเมินการปล่อยคาร์บอนจากการขนส่งทางถนน โดยกำหนดขอบเขตหลักเป็นเชื้อเพลิงที่ใช้ในการเดินรถของเที่ยวขนส่งที่กำลังวิเคราะห์</p><ul><li><b>Boundary:</b> จากต้นทางถึงปลายทางของเที่ยวขนส่งตามระยะทางที่กรอก</li><li><b>หน่วย:</b> เชื้อเพลิงเป็น L และ Emission Factor เป็น kgCO₂e/L</li><li><b>ไม่รวม:</b> กิจกรรมที่อยู่นอกขอบเขต เช่น คลังสินค้า การผลิตสินค้า หรือการเดินทางอื่น เว้นแต่ผู้วิเคราะห์จะกำหนดเพิ่ม</li><li><b>Allocation:</b> หากรถเที่ยวเดียวบรรทุกหลายสินค้า ต้องกำหนดหลักการแบ่งภาระ เช่น ตามน้ำหนักสินค้า และใช้หลักเดียวกันทุกแผน</li><li><b>Double counting:</b> เที่ยวที่ถูกรวมเป็นเที่ยวใหม่ต้องไม่นำการปล่อยของเที่ยวเดิมมาบวกซ้ำกับเที่ยวใหม่</li></ul></div><div class="card"><h2>การนำไปใช้ตัดสินใจ</h2><p class="muted">แนวคิดของระบบคือ “คำนวณก่อน แล้วจึงเปรียบเทียบทางเลือก” เพื่อช่วยผู้วางแผนขนส่งเห็นผลกระทบทั้งด้านสิ่งแวดล้อมและต้นทุน</p><ol><li><b>Baseline:</b> บันทึกแผนปัจจุบันก่อนปรับปรุง</li><li><b>Scenario:</b> ทดลองรวมเที่ยว เปลี่ยนรถ หรือเพิ่มประสิทธิภาพการใช้เชื้อเพลิง</li><li><b>Feasibility:</b> ตรวจสอบ Capacity และเงื่อนไขการให้บริการก่อนเลือกแผน</li><li><b>Comparison:</b> เปรียบเทียบ CO₂e, emission intensity และ cost ภายใต้ขอบเขตเดียวกัน</li><li><b>Decision:</b> เลือกแผนที่สมดุลระหว่างต้นทุน ความเป็นไปได้ในการปฏิบัติงาน และเป้าหมายลดคาร์บอน</li></ol><div class="sourcebox"><h3>แหล่งข้อมูลอ้างอิงของระบบ</h3><div class="sourcegrid"><div><span class="tag">TGO</span><p class="small">Emission Factor สำหรับ Mobile Source (On-road vehicles) ใช้ฐานข้อมูล CFO มกราคม 2569 เช่น Diesel = 2.740339134 kgCO₂e/L และ Diesel B7: Scope 1 = 2.5503727392 kgCO₂e/L ตามรายการของ TGO</p><a href="https://thaicarbonlabel.tgo.or.th/index.php?lang=TH&mod=YjNKbllXNXBlbUYwYVc5dVgyVnRhWE56YVc5dQ" target="_blank">เปิดฐานข้อมูล TGO</a></div><div><span class="tag">EPPO</span><p class="small">ราคาขายปลีกน้ำมันควรอ้างอิงข้อมูลล่าสุดของสำนักงานนโยบายและแผนพลังงาน (EPPO) โดยหน้าเว็บระบุวันที่มีผลของราคาและผู้จำหน่าย</p><a href="https://www.eppo.go.th/energy-price/oil-retail-price-today/" target="_blank">เปิดราคาน้ำมัน EPPO ล่าสุด</a></div></div><p class="small muted"><b>ข้อมูลปฏิบัติการ:</b> ระยะทาง น้ำหนัก น้ำมันที่ใช้ ความจุรถ และต้นทุนคงที่ ควรนำจาก GPS/TMS/ใบชั่ง/ใบเติมน้ำมัน/บัญชีของบริษัท และเก็บวันที่อ้างอิงทุกครั้ง เพื่อให้ตรวจสอบย้อนกลับได้</p><div class="sourcebox api"><h3>🔌 สถานะการเชื่อมต่อ API ราคาน้ำมัน</h3><p class="small">EPPO มีบริการ Restful API และ Data Catalog สำหรับข้อมูลพลังงานและราคาน้ำมัน แต่การใช้งาน API อย่างเป็นทางการต้องดำเนินการผ่านแบบฟอร์มขอใช้งานก่อน ดังนั้นเว็บไซต์เวอร์ชันนี้ <b>ยังไม่ดึงราคาแบบอัตโนมัติ</b> เพื่อหลีกเลี่ยงการใช้ endpoint หรือ API key ที่ไม่ได้รับอนุญาต</p><p class="small"><b>เมื่อได้รับสิทธิ์ API:</b> สามารถเชื่อม API → ดึงราคาล่าสุด → เติมช่องราคาน้ำมัน → บันทึกวันที่/แหล่งข้อมูล → คำนวณต้นทุนโดยอัตโนมัติได้</p><a href="https://www.eppo.go.th/data-energy-statistic/%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-api-2/" target="_blank">เปิดหน้า EPPO API</a> · <a href="https://data.eppo.go.th/" target="_blank">เปิด EPPO Data Portal</a></div></div></div></div></section>
 </main><div class="footer">Logistics Carbon Calculator · Decision Support for Sustainable Logistics</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <script>
 const EF={
  diesel:{name:'Diesel',ef:2.740339134,scope:'Mobile Source (On-road vehicles)',source:'TGO CFO มกราคม 2569'},
@@ -52,51 +52,88 @@ const EF={
  e20:{name:'Gasohol E20 — Scope 1',ef:1.7881022224,scope:'Mobile Source (On-road vehicles)',source:'TGO CFO มกราคม 2569'},
  e85:{name:'Gasohol E85 — Scope 1',ef:0.3439264062,scope:'Mobile Source (On-road vehicles)',source:'TGO CFO มกราคม 2569'}
 };
-let routeMap, originMarker=null, destinationMarker=null, routeLine=null, pickMode="origin";
-let originPoint=null, destinationPoint=null;
-function initRouteMap(){
-  if(typeof L==="undefined") return;
-  routeMap=L.map("routeMap").setView([13.7563,100.5018],6);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(routeMap);
+let routeMap=null, originMarker=null, destinationMarker=null, routePolylines=[], pickMode="origin";
+let originPoint=null, destinationPoint=null, googleRouteClass=null, googleMapsLoaded=false, googleLoadPromise=null;
+
+function savedGoogleKey(){return localStorage.getItem("logisticsGoogleMapsApiKey")||"";}
+function setGoogleStatus(html,cls="muted"){const el=document.getElementById("googleStatus");if(el){el.className="small "+cls;el.innerHTML=html;}}
+function loadGoogleMaps(){
+  const key=document.getElementById("googleApiKey").value.trim();
+  if(!key){setGoogleStatus("กรุณาวาง API Key ก่อน", "danger");return;}
+  localStorage.setItem("logisticsGoogleMapsApiKey",key);
+  if(googleMapsLoaded){setGoogleStatus("Google Maps พร้อมใช้งานแล้ว ✓","success");return;}
+  if(googleLoadPromise)return;
+  setGoogleStatus("กำลังโหลด Google Maps…");
+  googleLoadPromise=new Promise((resolve,reject)=>{
+    const s=document.createElement("script");
+    s.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(key)+"&v=weekly";
+    s.async=true;s.defer=true;
+    s.onload=()=>resolve();
+    s.onerror=()=>reject(new Error("โหลด Google Maps ไม่สำเร็จ"));
+    document.head.appendChild(s);
+  }).then(async()=>{
+    const [{Map},{Route}]=await Promise.all([google.maps.importLibrary("maps"),google.maps.importLibrary("routes")]);
+    googleRouteClass=Route;
+    routeMap=new Map(document.getElementById("routeMap"),{center:{lat:13.7563,lng:100.5018},zoom:6,mapTypeControl:true,streetViewControl:false,fullscreenControl:true});
+    googleMapsLoaded=true;
+    setGoogleStatus("Google Maps พร้อมใช้งานแล้ว ✓","success");
+    setPickMode("origin");
+    routeMap.addListener("click",e=>handleMapClick({lat:e.latLng.lat(),lng:e.latLng.lng()}));
+  }).catch(err=>{
+    googleLoadPromise=null;
+    setGoogleStatus("เชื่อมต่อ Google Maps ไม่สำเร็จ: "+err.message+" — ตรวจสอบ API Key, Billing และการเปิด Maps JavaScript API + Routes API","danger");
+  });
+}
+function removeGoogleKey(){localStorage.removeItem("logisticsGoogleMapsApiKey");document.getElementById("googleApiKey").value="";setGoogleStatus("ลบ API Key ออกจากเครื่องนี้แล้ว");}
+async function initRouteMap(){
+  const key=savedGoogleKey();
+  if(key)document.getElementById("googleApiKey").value=key;
+  document.getElementById("loadGoogleMap").addEventListener("click",loadGoogleMaps);
+  document.getElementById("removeGoogleKey").addEventListener("click",removeGoogleKey);
   document.getElementById("pickOrigin").addEventListener("click",()=>setPickMode("origin"));
   document.getElementById("pickDestination").addEventListener("click",()=>setPickMode("destination"));
   document.getElementById("clearRoute").addEventListener("click",clearRoute);
-  routeMap.on("click",e=>handleMapClick(e.latlng));
+  if(key)loadGoogleMaps();
 }
 function setPickMode(mode){pickMode=mode;document.getElementById("pickOrigin").classList.toggle("active",mode==="origin");document.getElementById("pickDestination").classList.toggle("active",mode==="destination");}
 function handleMapClick(latlng){
-  const marker=L.marker([latlng.lat,latlng.lng]).addTo(routeMap);
-  if(pickMode==="origin"){if(originMarker)routeMap.removeLayer(originMarker);originMarker=marker;originPoint=[latlng.lat,latlng.lng];setPickMode("destination");}
-  else {if(destinationMarker)routeMap.removeLayer(destinationMarker);destinationMarker=marker;destinationPoint=[latlng.lat,latlng.lng];}
+  if(!googleMapsLoaded)return;
+  const marker=new google.maps.Marker({position:latlng,map:routeMap});
+  if(pickMode==="origin"){if(originMarker)originMarker.setMap(null);originMarker=marker;originPoint=latlng;setPickMode("destination");}
+  else{if(destinationMarker)destinationMarker.setMap(null);destinationMarker=marker;destinationPoint=latlng;}
   updateRouteInfo();
-  if(originPoint&&destinationPoint)calculateRoadRoute();
+  if(originPoint&&destinationPoint)calculateGoogleRoute();
 }
 function updateRouteInfo(){
- const o=originPoint?originPoint.map(x=>x.toFixed(6)).join(", "):"ยังไม่ได้เลือก";
- const d=destinationPoint?destinationPoint.map(x=>x.toFixed(6)).join(", "):"ยังไม่ได้เลือก";
+ const o=originPoint?originPoint.lat.toFixed(6)+", "+originPoint.lng.toFixed(6):"ยังไม่ได้เลือก";
+ const d=destinationPoint?destinationPoint.lat.toFixed(6)+", "+destinationPoint.lng.toFixed(6):"ยังไม่ได้เลือก";
  document.getElementById("routeInfo").innerHTML='<div class="sourcebox"><b>ต้นทาง:</b> '+o+'<br><b>ปลายทาง:</b> '+d+'</div>';
 }
-async function calculateRoadRoute(){
- if(!originPoint||!destinationPoint)return;
- const info=document.getElementById("routeInfo");info.innerHTML='<div class="notice">กำลังหาเส้นทางถนน…</div>';
- const coords=originPoint[1]+","+originPoint[0]+";"+destinationPoint[1]+","+destinationPoint[0];
+async function calculateGoogleRoute(){
+ if(!originPoint||!destinationPoint||!googleRouteClass)return;
+ const info=document.getElementById("routeInfo");info.innerHTML='<div class="notice">กำลังคำนวณเส้นทางด้วย Google Routes API…</div>';
  try{
-  const res=await fetch("https://router.project-osrm.org/route/v1/driving/"+coords+"?overview=full&geometries=geojson");
-  if(!res.ok)throw new Error("route request failed");
-  const data=await res.json();
-  if(data.code!=="Ok"||!data.routes?.length)throw new Error("no route");
-  const route=data.routes[0], km=route.distance/1000, mins=route.duration/60;
-  if(routeLine)routeMap.removeLayer(routeLine);
-  routeLine=L.geoJSON(route.geometry,{style:{weight:5}}).addTo(routeMap);
-  routeMap.fitBounds(routeLine.getBounds(),{padding:[25,25]});
+  routePolylines.forEach(p=>p.setMap(null));routePolylines=[];
+  const request={origin:originPoint,destination:destinationPoint,travelMode:"DRIVING",routingPreference:"TRAFFIC_AWARE",fields:["path","distanceMeters","durationMillis"]};
+  const result=await googleRouteClass.computeRoutes(request);
+  if(!result.routes||!result.routes.length)throw new Error("ไม่พบเส้นทาง");
+  const route=result.routes[0];
+  routePolylines=route.createPolylines({polylineOptions:{strokeOpacity:0.9,strokeWeight:5}});
+  routePolylines.forEach(p=>p.setMap(routeMap));
+  if(route.viewport)routeMap.fitBounds(route.viewport);
+  const km=(route.distanceMeters||0)/1000, mins=(route.durationMillis||0)/60000;
   document.getElementById("distance").value=km.toFixed(2);
   syncAll();
-  info.innerHTML='<div class="notice success"><b>คำนวณเส้นทางแล้ว ✓</b><br>ระยะทางถนนประมาณ <b>'+km.toFixed(2)+' km</b> · เวลาเดินทางประมาณ <b>'+Math.round(mins)+' นาที</b><br><span class="small">ระบบนำระยะทางนี้ไปอัปเดตข้อ 1 และผลคำนวณส่วนอื่นโดยอัตโนมัติ</span></div>';
+  info.innerHTML='<div class="notice success"><b>Google Routes คำนวณเส้นทางแล้ว ✓</b><br>ระยะทางถนนประมาณ <b>'+km.toFixed(2)+' km</b> · เวลาเดินทางประมาณ <b>'+Math.round(mins)+' นาที</b><br><span class="small">ระบบนำระยะทางนี้ไปอัปเดตข้อ 1 และผลคำนวณส่วนอื่นโดยอัตโนมัติ</span></div>';
  }catch(e){
-  info.innerHTML='<div class="notice danger">ไม่สามารถหาเส้นทางได้ในขณะนี้ กรุณาตรวจสอบจุดที่เลือก หรือกรอกระยะทางในข้อ 1 เอง</div>';
+  info.innerHTML='<div class="notice danger">Google Routes API ไม่สามารถคำนวณเส้นทางได้: '+(e.message||"unknown error")+'<br><span class="small">ตรวจสอบว่าเปิด Maps JavaScript API และ Routes API แล้ว และ API Key อนุญาตโดเมน GitHub Pages นี้</span></div>';
  }
 }
-function clearRoute(){if(originMarker)routeMap.removeLayer(originMarker);if(destinationMarker)routeMap.removeLayer(destinationMarker);if(routeLine)routeMap.removeLayer(routeLine);originMarker=destinationMarker=routeLine=null;originPoint=destinationPoint=null;setPickMode("origin");updateRouteInfo();}
+function clearRoute(){
+ if(originMarker)originMarker.setMap(null);if(destinationMarker)destinationMarker.setMap(null);
+ routePolylines.forEach(p=>p.setMap(null));routePolylines=[];
+ originMarker=destinationMarker=null;originPoint=destinationPoint=null;setPickMode("origin");updateRouteInfo();
+}
 function val(id){return Number(document.getElementById(id).value)||0}
 function fuelInfo(){return EF[document.getElementById('fueltype').value]||EF.diesel}
 function applyFuelSource(){const f=fuelInfo();document.getElementById('ef').value=f.ef;document.getElementById('fuelSource').innerHTML=`<h3>ข้อมูลอ้างอิงเชื้อเพลิง <span class="tag">${f.source}</span></h3><div class="small"><b>${f.name}</b> · EF = <b>${f.ef}</b> kgCO₂e/L · ${f.scope}</div><div class="small muted" style="margin-top:6px">แหล่งข้อมูล: TGO · ค่า EF นี้เป็นค่าตามขอบเขตที่เลือก ไม่ควรนำไปใช้แทนขอบเขตอื่น</div>`}
@@ -114,6 +151,7 @@ applyFuelSource();toggleRealFuel();calculate();updateCombineDisplay();
 const linkedInputs=["distance","weight","capacity","efficiency","realDistance","realFuel","fuelprice","ef","fixed","effMode","fueltype"];
 linkedInputs.forEach(id=>{const el=document.getElementById(id);el.addEventListener("input",syncAll);el.addEventListener("change",syncAll);});
 initRouteMap();
-// หมายเหตุ API: EPPO มีบริการ Restful API อย่างเป็นทางการ แต่ต้องขอสิทธิ์ก่อนใช้งาน จึงไม่ฝัง API key ในหน้าเว็บสาธารณะ
+// Google Maps/Routes: API Key ถูกเก็บใน localStorage ของผู้ใช้ ไม่ฝัง Key ลง GitHub เพื่อไม่เปิดเผย credential ใน source code
+
 
 </script></body></html>
